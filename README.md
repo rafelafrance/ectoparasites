@@ -1,2 +1,2 @@
 # ectoparasites
-Database and supporting functions for research of ectoparasites
+Utilites and database supporting ectoparasite research.

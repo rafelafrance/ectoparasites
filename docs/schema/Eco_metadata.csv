@@ -1,0 +1,73 @@
+header,group,data_type,given_type,description
+Country,,text,Nominal,
+Site ID,,text,Numerical nominal,
+Elevation,,real,Numerical continuous,
+Lat,,real,Numerical continuous,
+Long,,real,Numerical continuous,
+Date (mm/dd/yyyy),,date,Numerical continuous,
+Hfamily,,text,Nominal,Host family
+Hgenus,,text,Nominal,Host genus
+Hspecies,,text,Nominal,Host species
+Vial#,,id,Numerical continuous,
+Mass,,real,Numerical continuous,
+OI,,text,Nominal,Other information 
+"Ectoparasites (Y,N)",,boolean,Categorical,
+"Ectoprocessed (Y,N)",,boolean,Categorical,Ectoparasites processed
+Method,,text,Nominal,
+Age,,integer,,
+,,,,
+,,,,
+"Lice (Y,N)",Lice,boolean,Categorical,
+Genus,Lice,text,Nominal,
+Species,Lice,text,Nominal,
+Verbatim_abundance,Lice,text,,Include abundance categories and notes
+Abundance,Lice,integer,Numerical continuous,
+Locality tube,Lice,text,Nominal,The place where tube is saved
+DNA extracted,Lice,boolean,Categorical,"Yes, No"
+DNAextMethod,Lice,text,Nominal,Method of DNA extraction
+PathogenDNA_ID,Lice,id,Nominal,Pathogen ID based on DNA
+UID#,Lice,id,Numerical continuous,Unique ID number
+,,,,
+"Mites (Y,N)",Mites,boolean,Categorical,
+Genus,Mites,text,Nominal,
+Species,Mites,text,Nominal,
+Verbatim_abundance,Mites,text,,Include abundance categories and notes
+Abundance,Mites,integer,Numerical continuous,
+Locality tube,Mites,text,Nominal,The place where tube is saved
+DNA extracted,Mites,boolean,Categorical,"Yes, No"
+DNAextMethod,Mites,text,Nominal,Method of DNA extraction
+PathogenDNA_ID,Mites,id,Nominal,Pathogen ID based on DNA
+UID#,Mites,id,Numerical continuous,Unique ID number
+,,,,
+"Ticks (Y,N)",Ticks,boolean,Categorical,
+Genus,Ticks,text,Nominal,
+Species,Ticks,text,Nominal,
+Verbatim_abundance,Ticks,text,,Include abundance categories and notes
+Abundance,Fleas,integer,Numerical continuous,
+Locality tube,Ticks,text,Nominal,The place where tube is saved
+DNA extracted,Ticks,boolean,Categorical,"Yes, No"
+DNAextMethod,Ticks,text,Nominal,Method of DNA extraction
+PathogenDNA_ID,Ticks,id,Nominal,Pathogen ID based on DNA
+UID#,Ticks,id,Numerical continuous,Unique ID number
+,,,,
+"Fleas (Y,N)",Fleas,boolean,Categorical,
+Genus,Fleas,text,Nominal,
+Species,Fleas,text,Nominal,
+Verbatim_abundance,Fleas,text,,Include abundance categories and notes
+Abundance,Fleas,integer,Numerical continuous,
+Locality tube,Fleas,text,Nominal,The place where tube is saved
+DNA extracted,Fleas,boolean,Categorical,"Yes, No"
+DNAextMethod,Fleas,text,Nominal,Method of DNA extraction
+PathogenDNA_ID,Fleas,id,Nominal,Pathogen ID based on DNA
+UID#,Fleas,id,Numerical continuous,Unique ID number
+,,,,
+"Flies (Y,N)",Flies,boolean,Categorical,
+Genus,Flies,text,Nominal,
+Species,Flies,text,Nominal,
+Verbatim_abundance,Flies,text,,Include abundance categories and notes
+Abundance,Flies,integer,Numerical continuous,
+Locality tube,Flies,text,Nominal,The place where tube is saved
+DNA extracted,Flies,boolean,Categorical,"Yes, No"
+DNAextMethod,Flies,text,Nominal,Method of DNA extraction
+PathogenDNA_ID,Flies,id,Nominal,Pathogen ID based on DNA
+UID#,Flies,id,Numerical continuous,Unique ID number
