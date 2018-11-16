@@ -23,6 +23,7 @@ def ingest():
         'version': '2018-11-04'})
 
     to_taxon_id = insert_host_taxa(raw_data)
+    print(len(to_taxon_id))
 
 
 def get_raw_data():

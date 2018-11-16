@@ -9,7 +9,7 @@ CREATE TABLE datasets (
 DROP TABLE IF EXISTS taxa;
 CREATE TABLE taxa (
   taxon_id    INTEGER NOT NULL PRIMARY KEY,
-  sci_name    TEXT NOT NULL UNIQUE,
+  sci_name    TEXT UNIQUE,
   "group"     TEXT,
   "order"     TEXT,
   family      TEXT,
