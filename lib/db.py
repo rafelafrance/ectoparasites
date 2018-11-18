@@ -14,6 +14,9 @@ PROCESSED = Path('data') / 'processed'
 DB_FILE = abspath(PROCESSED / 'ectoparasites.sqlite.db')
 SCRIPT_PATH = Path('sql')
 
+SITE_COLUMNS = """site_id dataset_id long lat radius elevation elevation_radius
+    country dataset_site_id geohash site_json""".split()
+
 
 def connect(path=None):
     """Connect to an SQLite database."""

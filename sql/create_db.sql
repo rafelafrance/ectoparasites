@@ -25,8 +25,8 @@ DROP TABLE IF EXISTS sites;
 CREATE TABLE sites (
   site_id          INTEGER NOT NULL PRIMARY KEY,
   dataset_id       TEXT NOT NULL,
-  long             NUMERIC NOT NULL,
-  lat              NUMERIC NOT NULL,
+  long             NUMERIC,
+  lat              NUMERIC,
   radius           NUMERIC,
   elevation        NUMERIC,
   elevation_radius NUMERIC,
