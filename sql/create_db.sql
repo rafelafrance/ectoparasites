@@ -10,12 +10,14 @@ DROP TABLE IF EXISTS taxa;
 CREATE TABLE taxa (
   taxon_id    INTEGER NOT NULL PRIMARY KEY,
   sci_name    TEXT UNIQUE,
+  binary      TEXT,
   "group"     TEXT,
   "order"     TEXT,
   family      TEXT,
   genus       TEXT
 );
 CREATE INDEX taxa_sci_name ON taxa (sci_name);
+CREATE INDEX taxa_binary ON taxa (binary);
 CREATE INDEX taxa_group  ON taxa ("group");
 CREATE INDEX taxa_order  ON taxa ("order");
 CREATE INDEX taxa_family ON taxa (family);
@@ -31,6 +33,7 @@ CREATE TABLE sites (
   elevation        NUMERIC,
   elevation_radius NUMERIC,
   country          TEXT,
+  road_location    TEXT,
   dataset_site_id  TEXT,
   geohash          TEXT,
   site_json        TEXT
@@ -50,8 +53,7 @@ CREATE TABLE hosts (
   method          TEXT,
   mass            NUMERIC,
   age             TEXT,
-  ectoparasites   BOOLEAN,
-  ectoprocessed   BOOLEAN,
+  sex             TEXT,
   dataset_host_id TEXT,
   host_json       TEXT
 );
@@ -66,10 +68,12 @@ CREATE TABLE samples (
   host_id           INTEGER NOT NULL,
   dataset_id        TEXT NOT NULL,
   sample_date       TEXT,
-  vial_no           TEXT,
   method            TEXT,
+  ectoparasites     BOOLEAN,
+  ectoprocessed     BOOLEAN,
+  box_location      TEXT,
   box_id            TEXT,
-  road_location     TEXT,
+  vial_no           TEXT,
   dataset_sample_id TEXT,
   sample_json       TEXT
 );

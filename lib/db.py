@@ -15,7 +15,18 @@ DB_FILE = abspath(PROCESSED / 'ectoparasites.sqlite.db')
 SCRIPT_PATH = Path('sql')
 
 SITE_COLUMNS = """site_id dataset_id long lat radius elevation elevation_radius
-    country dataset_site_id geohash site_json""".split()
+    country road_location dataset_site_id geohash site_json""".split()
+
+HOST_COLUMNS = """host_id site_id host_taxon_id dataset_id mass age sex
+    dataset_host_id host_json""".split()
+
+SAMPLE_COLUMNS = """sample_id host_id dataset_id sample_date vial_no method
+    ectoparasites ectoprocessed box_location box_id dataset_sample_id method
+    sample_json""".split()
+
+PARASITE_COLUMNS = """parasite_id sample_id parasite_taxon_id dataset_id
+    verbatim_abundance abundance locality_tube vial_no dna_extracted dna_method
+    pathogen_dna_id species_slide parasite_json""".split()
 
 
 def connect(path=None):
