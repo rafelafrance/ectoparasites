@@ -3,6 +3,7 @@
 """Wrapper for ecoparasites functions."""
 
 import argparse
+import textwrap
 import lib.db as db
 from lib.util import log
 import lib.columbia_ingest as columbia_ingest
@@ -19,8 +20,9 @@ def parse_args():
     """Get user input."""
     parser = argparse.ArgumentParser(
         allow_abbrev=True,
-        description='Extract, transform, & load data for the '
-                    'sightings database.')
+        description=textwrap.dedent("""
+            Extract, transform, & load data for the ectoparasites database.
+            """))
     subparsers = parser.add_subparsers()
 
     backup_parser = subparsers.add_parser(
@@ -39,10 +41,8 @@ def parse_args():
     ingest_parser.add_argument(
         'datasets',
         nargs='+',
-        metavar='DATASET',
         choices=INGEST_OPTIONS,
-        help=f"""Ingest a dataset into the SQLite3 database.
-            Options: { ", ".join(INGEST_OPTIONS) }.""")
+        help=f"""Ingest a dataset into the SQLite3 database.""")
     ingest_parser.set_defaults(func=ingest)
 
     return parser.parse_args()

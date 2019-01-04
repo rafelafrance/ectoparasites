@@ -9,6 +9,7 @@ from datetime import datetime
 import pandas as pd
 from lib.util import log
 
+VERSION = 'v0.1.1'
 
 PROCESSED = Path('data') / 'processed'
 DB_FILE = abspath(PROCESSED / 'ectoparasites.sqlite.db')
@@ -52,6 +53,15 @@ def create():
         remove(DB_FILE)
 
     subprocess.check_call(cmd, shell=True)
+
+    insert_db_version()
+
+
+def insert_db_version():
+    """Insert the version of the database."""
+    cxn = connect()
+    cxn.execute('INSERT INTO version (version) VALUES (?)', (VERSION, ))
+    cxn.commit()
 
 
 def backup_database():
