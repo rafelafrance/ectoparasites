@@ -87,11 +87,30 @@ def delete_dataset(dataset_id):
     log(f'Deleting old {dataset_id} records')
 
     cxn = connect()
+
     cxn.execute('DELETE FROM datasets WHERE dataset_id = ?', (dataset_id, ))
-    cxn.execute('DELETE FROM sites WHERE dataset_id = ?', (dataset_id, ))
-    cxn.execute('DELETE FROM hosts WHERE dataset_id = ?', (dataset_id, ))
-    cxn.execute('DELETE FROM samples WHERE dataset_id = ?', (dataset_id, ))
-    cxn.execute('DELETE FROM parasites WHERE dataset_id = ?', (dataset_id, ))
+
+    sql = """DELETE FROM sites
+              WHERE dataset_id NOT IN (SELECT dataset_id FROM datasets)"""
+    cxn.execute(sql)
+
+    sql = """DELETE FROM hosts
+              WHERE site_id NOT IN (SELECT site_id FROM sites)"""
+    cxn.execute(sql)
+
+    sql = """DELETE FROM samples
+              WHERE host_id NOT IN (SELECT host_id FROM hosts)"""
+    cxn.execute(sql)
+
+    sql = """DELETE FROM parasite_groups
+              WHERE sample_id NOT IN (SELECT sample_id FROM samples)"""
+    cxn.execute(sql)
+
+    sql = """DELETE FROM parasites
+              WHERE parasite_group_id
+                NOT IN (SELECT parasite_group_id FROM parasite_groups)"""
+    cxn.execute(sql)
+
     cxn.commit()
 
 
