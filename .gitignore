@@ -103,6 +103,8 @@ venv.bak/
 .mypy_cache/
 
 
+admin/
+
 output/*
 data/temp/*
 
