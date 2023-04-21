@@ -18,7 +18,7 @@
 *.swp
 __pycache__
 .ipynb_checkpoints/
-digi_leap.egg-info/
+*.egg-info/
 
 # Environment
 venv/
