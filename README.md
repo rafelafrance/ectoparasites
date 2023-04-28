@@ -21,22 +21,22 @@ The script has a relatively small amount of logic to process this data.
 **Note that each CSV file may contain data for several database tables and each database table may have data in several CSV files.**
 It's a many-to-many situation where a CSV can match many database tables and a database table can match many CSVs. 
 
-Each Table has a:
-1. name: The database table name.
-2. fields: Is a list of field classes.
+Each `Table` has a:
+1. `name`: The database table name.
+2. `columns`: Is a list of field classes.
 
-Each Field contains:
-1. name: The database column name.
-2. type: The data type for the database column.
-3. columns: A list of potential column names in the CSV that map to this database columns.
+Each `Column` contains:
+1. `name`: The database column name.
+2. `type`: The data type for the database column.
+3. `csv`: A list of potential column names in a CSV that map to this database column.
    1. For example the "species" database column will map to "species" in some CSVs and to "bird_specie" in other CSVs.
 
-Program logic:
+Program logic (from 30,000 ft.):
 1. `./ectoparasites/ingest.py --db /path/to/your/database.sqlite --csv-dir /path/to/raw/csv/data/dir` 
    1. Use the `--replace` option to replace data in the tables and leave it out to append data.
-2. The program scan the given `--csv-dir` for all CSVs in it.
+2. The program scans the given `--csv-dir` for all CSVs in it.
 3. For every `Table` object in the `TABLES` list it looks in each CSV file to see if all the database table's columns are contained in it. If all database columns are in the CSV file:
-      1. We extract the subset of columns from the CSV file for the DB table.
-      2. Rename the CSV columns to match the database columns.
-      3. Update the data type to match what we need for the database column.
-      4. Write the data to the database table.
+      1. Extracts the subset of columns from the CSV file that match the DB columns.
+      2. Renames the CSV columns to match the database columns.
+      3. Updates the data type to match what we need for the database column.
+      4. Writes the data to the database table.
