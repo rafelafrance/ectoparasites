@@ -7,6 +7,7 @@ import textwrap
 from dataclasses import dataclass
 from itertools import product
 from pathlib import Path
+from typing import Literal
 
 import pandas as pd
 from pylib import log
@@ -183,7 +184,10 @@ def main():
 
 
 def ingest_data(db_path, csv_tables, replace):
-    if_exists = "replace" if replace else "append"
+    if_exists: Literal["replace", "append"] = "append"
+    if replace:
+        if_exists = "replace"
+
     with sqlite3.connect(db_path) as cxn:
         for table in TABLES:
             logging.info(f"Getting data for: {table.name}")
@@ -216,15 +220,15 @@ def extract_csv_data(csv_tables, db_table):
     for table_name, csv_table in csv_tables.items():
         csv_column_set = set(csv_table.columns)
 
-        best_cover = csv_column_set
+        best_missing = csv_column_set
 
         # Examine every possible combination of column names for a match
         for targets in product(*all_targets):
             target_set = set(targets)
             
-            cover = set(targets) - set(csv_table.columns)
-            if len(cover) < len(best_cover):
-                best_cover = cover
+            missing = set(targets) - set(csv_table.columns)
+            if len(missing) < len(best_missing):
+                best_missing = missing
 
             # Did we find all table columns in the CSV?
             if csv_column_set >= target_set:
@@ -243,7 +247,9 @@ def extract_csv_data(csv_tables, db_table):
                 logging.info(f"Hit  {db_table.name} & {table_name}")
                 break  # Go look for data in the next CSV table
         else:
-            logging.info(f"Miss {db_table.name} & {table_name} Best = {best_cover}")
+            logging.info(
+                f"Miss {db_table.name} & {table_name} Missing = {best_missing}"
+            )
 
     if all_csv_data:
         table_df = pd.concat(all_csv_data)
