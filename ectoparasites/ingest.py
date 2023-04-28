@@ -5,18 +5,18 @@ import logging
 import sqlite3
 import textwrap
 from dataclasses import dataclass
+from itertools import product
 from pathlib import Path
 
 import pandas as pd
-
 from pylib import log
 
 
 @dataclass
 class Field:
-    field: str
+    name: str
     type: str
-    column: str
+    columns: list[str]
 
 
 @dataclass
@@ -25,118 +25,147 @@ class Table:
     fields: list[Field]
 
 
+TYPE = {
+    "categorical": "string", 
+    "int": "int32",
+    "numeric": "float32",
+    "numerical": "float32",
+    "text":  "string",
+    "y/n": "boolean",
+}
+
+
 TABLES = [
     Table("taxonomy", [
-        Field(field="capture_id", type="categorical", column="id"),
-        Field(field="band", type="categorical", column="band"),
-        Field(field="species", type="text", column="species"),
+        Field(name="capture_id", type="categorical", columns=["id"]),
+        Field(name="band", type="categorical", columns=["band"]),
+        Field(
+            name="species",
+            type="text",
+            columns=["species", "bird species", "specie", "bird_specie"],
+        ),
     ]),
     Table("gps", [
-        Field(field="site", type="categorical", column="site"),
-        Field(field="location", type="categorical", column="location"),
-        Field(field="latitude", type="numeric", column="lat"),
-        Field(field="longitude", type="numeric", column="lon"),
-        Field(field="altitude", type="numeric", column="ele"),
+        Field(name="site", type="categorical", columns=["site"]),
+        Field(name="location", type="categorical", columns=["location", "localidad"]),
+        Field(name="latitude", type="numeric", columns=["lat"]),
+        Field(name="longitude", type="numeric", columns=["lon"]),
+        Field(name="altitude", type="numeric", columns=["ele"]),
     ]),
     Table("site", [
-        Field(field="capture_id", type="categorical", column="id"),
-        Field(field="band", type="categorical", column="band"),
-        Field(field="site", type="categorical", column="site"),
-        Field(field="location", type="categorical", column="location"),
+        Field(name="capture_id", type="categorical", columns=["id"]),
+        Field(name="band", type="categorical", columns=["band"]),
+        Field(name="site", type="categorical", columns=["site"]),
+        Field(name="location", type="categorical", columns=["location", "localidad"]),
     ]),
     Table("date", [
-        Field(field="capture_id", type="categorical", column="id"),
-        Field(field="band", type="categorical", column="band"),
-        Field(field="day", type="numerical", column="day"),
-        Field(field="month", type="numerical", column="month"),
-        Field(field="year", type="numerical", column="year"),
+        Field(name="capture_id", type="categorical", columns=["id"]),
+        Field(name="band", type="categorical", columns=["band"]),
+        Field(name="day", type="int", columns=["day"]),
+        Field(name="month", type="text", columns=["month"]),
+        Field(name="year", type="int", columns=["year"]),
     ]),
     Table("bird_quantitative", [
-        Field(field="capture_id", type="categorical", column="id"),
-        Field(field="band", type="categorical", column="band"),
-        Field(field="mass", type="categorical", column="mass"),
-        Field(field="tar", type="numerical", column="tar"),
-        Field(field="ct", type="numerical", column="ct"),
-        Field(field="ce", type="numerical", column="ce"),
-        Field(field="pw", type="numerical", column="pw"),
-        Field(field="ph", type="numerical", column="ph"),
-        Field(field="com", type="numerical", column="com"),
-        Field(field="halux", type="numerical", column="hal"),
-        Field(field="nail", type="numerical", column="uña"),
-        Field(field="claw_extension", type="numerical", column="ext"),
-        Field(field="rc", type="numerical", column="rc"),
-        Field(field="re", type="numerical", column="re"),
-        Field(field="wing", type="numerical", column="ala"),
-        Field(field="p_s", type="numerical", column="p-s"),
+        Field(name="capture_id", type="categorical", columns=["id"]),
+        Field(name="band", type="categorical", columns=["band"]),
+        Field(name="mass", type="categorical", columns=["mass"]),
+        Field(name="tar", type="numerical", columns=["tar"]),
+        Field(name="ct", type="numerical", columns=["ct"]),
+        Field(name="ce", type="numerical", columns=["ce"]),
+        Field(name="pw", type="numerical", columns=["pw"]),
+        Field(name="ph", type="numerical", columns=["ph"]),
+        Field(name="com", type="numerical", columns=["com"]),
+        Field(name="halux", type="numerical", columns=["hal"]),
+        Field(name="nail", type="numerical", columns=["uña", "una"]),
+        Field(name="claw_extension", type="numerical", columns=["ext"]),
+        Field(name="rc", type="numerical", columns=["rc"]),
+        Field(name="re", type="numerical", columns=["re"]),
+        Field(name="wing", type="numerical", columns=["ala"]),
+        Field(name="p_s", type="numerical", columns=["p-s"]),
     ]),
     Table("bird_categorical", [
-        Field(field="capture_id", type="categorical", column="id"),
-        Field(field="band", type="categorical", column="band"),
-        Field(field="age", type="categorical", column="age"),
-        # Field(field="how_aged", type="categorical", column="how aged"),
-        Field(field="sex", type="categorical", column="sex"),
-        # Field(field="how_sexed", type="categorical", column="how sexed"),
-        Field(field="reproduction", type="categorical", column="rep"),
-        Field(field="fat", type="categorical", column="fat"),
-        Field(field="bm", type="categorical", column="bm"),
-        Field(field="fm", type="categorical", column="fm"),
-        # Field(field="pec_muscle", type="categorical", column="musculo"),
-        # Field(field="pro_cloacal", type="categorical", column="pro_cloacal"),
-        # Field(field="brood_patch", type="categorical", column="parche_inc"),
-        Field(field="recapture", type="y/n", column="recap"),
-        # Field(field="status", type="categorical", column="status"),
-        # Field(field="leg_color", type="categorical", column="leg color"),
-        # Field(field="orbital_color", type="categorical", column="orbital color"),
-        # Field(field="skull", type="categorical", column="skull"),
-        Field(field="notes", type="categorical", column="notes"),
+        Field(name="capture_id", type="categorical", columns=["id"]),
+        Field(name="band", type="categorical", columns=["band"]),
+        Field(name="age", type="categorical", columns=["age"]),
+        # Field(name="how_aged", type="categorical", columns=["how aged"]),
+        Field(name="sex", type="categorical", columns=["sex"]),
+        # Field(name="how_sexed", type="categorical", columns=["how sexed"]),
+        Field(name="reproduction", type="categorical", columns=["rep", "rep."]),
+        Field(name="fat", type="categorical", columns=["fat"]),
+        Field(name="bm", type="categorical", columns=["bm"]),
+        Field(name="fm", type="categorical", columns=["fm"]),
+        # Field(name="pec_muscle", type="categorical", columns=["musculo"]),
+        # Field(name="pro_cloacal", type="categorical", columns=["pro_cloacal"]),
+        # Field(name="brood_patch", type="categorical", columns=["parche_inc"]),
+        Field(name="recapture", type="y/n", columns=["recap"]),
+        # Field(name="status", type="categorical", columns=["status"]),
+        # Field(name="leg_color", type="categorical", columns=["leg color"]),
+        # Field(name="orbital_color", type="categorical", columns=["orbital color"]),
+        # Field(name="skull", type="categorical", columns=["skull"]),
+        Field(name="notes", type="categorical", columns=["notes", "observaciones"]),
     ]),
     Table("bird_samples", [
-        Field(field="capture_id", type="categorical", column="id"),
-        Field(field="band", type="categorical", column="band"),
-        Field(field="blood", type="y/n", column="blood"),
-        Field(field="ectos", type="y/n", column="paras"),
-        Field(field="feather", type="y/n", column="feather"),
-        # Field(field="collect_number", type="numerical", column="Num_Colecta"),
-        Field(field="photo", type="y/n", column="photo#"),
+        Field(name="capture_id", type="categorical", columns=["id"]),
+        Field(name="band", type="categorical", columns=["band"]),
+        Field(name="blood", type="y/n", columns=["blood"]),
+        Field(name="ectos", type="y/n", columns=["paras"]),
+        Field(name="feather", type="y/n", columns=["feather"]),
+        # Field(name="collect_number", type="numerical", columns=["num_colecta"]),
+        Field(name="photo", type="y/n", columns=["photo#", "photo"]),
     ]),
     Table("bird_band", [
-        Field(field="capture_id", type="categorical", column="id"),
-        Field(field="band", type="categorical", column="band"),
-        # Field(field="ring_color", type="categorical", column="color_anillo"),
-        # Field(field="bander", type="text", column="anillador"),
-        # Field(field="banding_day", type="categorical", column="banding day"),
+        Field(name="capture_id", type="categorical", columns=["id"]),
+        Field(name="band", type="categorical", columns=["band"]),
+        # Field(name="ring_color", type="categorical", columns=["color_anillo"]),
+        # Field(name="bander", type="text", columns=["anillador"]),
+        # Field(name="banding_day", type="categorical", columns=["banding day"]),
     ]),
     # Table("net_location", [
-    #     Field(field="capture_id", type="categorical", column="id"),
-    #     Field(field="band", type="categorical", column="band"),
-    #     Field(field="site", type="categorical", column="site"),
-    #     Field(field="location", type="categorical", column="location"),
-    #     # Field(field="net_number", type="categorical", column="net"),
+    #     Field(name="capture_id", type="categorical", columns=["id"]),
+    #     Field(name="band", type="categorical", columns=["band"]),
+    #     Field(name="site", type="categorical", columns=["site"]),
+    #     Field(name="location", type="categorical", columns=["location"]),
+    #     # Field(name="net_number", type="categorical", columns=["net"]),
     # ]),
     # Table("positive_ectos", [
-    #     Field(field="capture_id", type="categorical", column="id"),
-    #     Field(field="box", type="", column="box"),
-    #     Field(field="box_position", type="", column="box_position"),
-    #     Field(field="bird_specie", type="", column="bird_specie"),
-    #     Field(field="ecto_group", type="", column="ecto_group"),
-    #     Field(field="station", type="", column="station"),
-    #     Field(field="capture_id", type="", column="capture_id"),
-    #     Field(field="date", type="", column="date"),
-    #     Field(field="format_date", type="", column="format_date"),
-    #     Field(field="year", type="", column="year"),
-    #     Field(field="month", type="", column="month"),
-    #     Field(field="day", type="", column="day"),
-    #     Field(field="band", type="", column="band"),
-    #     Field(field="old_box_position", type="", column="old_box_position"),
-    #     Field(field="notes", type="", column="notes"),
+    #     Field(name="capture_id", type="categorical", columns=["id"]),
+    #     Field(name="box", type="", columns=["box"]),
+    #     Field(name="box_position", type="", columns=["box_position"]),
+    #     Field(name="bird_specie", type="", columns=["bird_specie"]),
+    #     Field(name="ecto_group", type="", columns=["ecto_group"]),
+    #     Field(name="station", type="", columns=["station"]),
+    #     Field(name="capture_id", type="", columns=["capture_id"]),
+    #     Field(name="date", type="", columns=["date"]),
+    #     Field(name="format_date", type="", columns=["format_date"]),
+    #     Field(name="year", type="", columns=["year"]),
+    #     Field(name="month", type="", columns=["month"]),
+    #     Field(name="day", type="", columns=["day"]),
+    #     Field(name="band", type="", columns=["band"]),
+    #     Field(name="old_box_position", type="", columns=["old_box_position"]),
+    #     Field(name="notes", type="", columns=["notes"]),
     # ]),
     # Table("ectos", [
-    #     Field(field="id", type="categorical", column="id"),
-    #     Field(field="band", type="categorical", column="band"),
-    #     Field(field="ectos", type="y/n", column="ectos"),
-    #     Field(field="ecto_type", type="categorical", column="ecto_type"),
-    #     Field(field="looked_ectos", type="y/n", column="looked_ectos"),
-    #     Field(field="ectos_technique", type="categorical", column="ectos_technique"),
+    #     Field(name="id", type="categorical", columns=["id"]),
+    #     Field(name="band", type="categorical", columns=["band"]),
+    #     Field(name="ectos", type="y/n", columns=["ectos"]),
+    #     Field(name="ecto_type", type="categorical", columns=["ecto_type"]),
+    #     Field(name="looked_ectos", type="y/n", columns=["looked_ectos"]),
+    #   Field(name="ectos_technique", type="categorical", columns=["ectos_technique"]),
+    # ]),
+    # Table("dataset", [
+    #     Field(name="dataset_id", type="text", columns=[]),  Auto generate
+    #     Field(name="principle_investigator", type="categorical", columns=[]), Literal
+    #     Field(name="data_type", type="categorical", columns=[]), Literal
+    #     Field(name="country", type="categorical", columns=[]), Literal
+    # ]),
+    # Table("site", [
+    # ]),
+    # Table("locality", [
+    #     Field(name="site_id", type="text", columns=["site_id"]),
+    #     Field(name="location_id", type="categorical", columns=["location", "localidad"]),
+    #     Field(name="latitude", type="numeric", columns=["lat"]),
+    #     Field(name="longitude", type="numeric", columns=["lon"]),
+    #     Field(name="elevation", type="numeric", columns=["ele"]),
     # ]),
 ]
 
@@ -146,43 +175,86 @@ def main():
 
     args = parse_args()
 
-    dfs = {}
-    for path in sorted(args.csv_dir.glob("*.csv")):
-        df = pd.read_csv(path)
-        dfs[path.stem.lower()] = fix_column_names(df)
+    csv_tables = get_csv_tables(args.csv_dir)
 
-    with sqlite3.connect(args.db) as cxn:
-        for table in TABLES:
-            logging.info(f"Getting data for: {table.name}")
-            targets = [f.column for f in table.fields]
-            renames = {f.column: f.field for f in table.fields}
-            df = get_data(dfs, targets)
-            df = df.rename(renames, axis="columns")
-            df.to_sql(table.name, con=cxn, index=False, if_exists="replace")
+    ingest_data(args.db, csv_tables, args.replace)
 
     log.finished()
 
 
+def ingest_data(db_path, csv_tables, replace):
+    if_exists = "replace" if replace else "append"
+    with sqlite3.connect(db_path) as cxn:
+        for table in TABLES:
+            logging.info(f"Getting data for: {table.name}")
+            df = extract_csv_data(csv_tables, table)
+            if not df.empty:
+                df.to_sql(table.name, con=cxn, index=False, if_exists=if_exists)
+
+
+def get_csv_tables(csv_dir):
+    csv_tables = {}
+    for path in sorted(csv_dir.glob("*.csv")):
+        df = pd.read_csv(path)
+        csv_tables[path.stem.lower()] = fix_column_names(df)
+    return csv_tables
+
+
 def fix_column_names(df):
+    """Normalize column names to reduce the amount of Field columns to store."""
     renames = {c: c.lower() for c in df.columns}
     df = df.rename(renames, axis="columns")
     return df
 
 
-def get_data(dfs, targets):
-    target_set = set(targets)
-    new = []
-    for name, df in dfs.items():
-        # print(target_set - set(df.columns))
-        if set(df.columns) >= target_set:
-            new.append(df.loc[:, targets])
-    df = pd.concat(new)
-    df = df.drop_duplicates()
-    return df
+def extract_csv_data(csv_tables, db_table):
+    all_csv_data = []
+
+    all_targets = [f.columns for f in db_table.fields]
+
+    # Look thru all CSV dataframes
+    for table_name, csv_table in csv_tables.items():
+        csv_column_set = set(csv_table.columns)
+
+        best_cover = csv_column_set
+
+        # Examine every possible combination of column names for a match
+        for targets in product(*all_targets):
+            target_set = set(targets)
+            
+            cover = set(targets) - set(csv_table.columns)
+            if len(cover) < len(best_cover):
+                best_cover = cover
+
+            # Did we find all table columns in the CSV?
+            if csv_column_set >= target_set:
+
+                db_table_data = csv_table.loc[:, targets]
+
+                # Rename CSV columns to what they'll be in the database table
+                renames = {t: f.name for t, f in zip(targets, db_table.fields)}
+                db_table_data = db_table_data.rename(renames, axis="columns")
+
+                # Try to get the proper data type for each column
+                types = {f.name: TYPE[f.type] for f in db_table.fields}
+                db_table_data = db_table_data.astype(types, errors="ignore")
+
+                all_csv_data.append(db_table_data)
+                logging.info(f"Hit  {db_table.name} & {table_name}")
+                break  # Go look for data in the next CSV table
+        else:
+            logging.info(f"Miss {db_table.name} & {table_name} Best = {best_cover}")
+
+    if all_csv_data:
+        table_df = pd.concat(all_csv_data)
+        table_df = table_df.drop_duplicates()
+    else:
+        table_df = pd.DataFrame()
+
+    return table_df
 
 
 def parse_args():
-
     description = """Ingest ectoparasite data."""
 
     parser = argparse.ArgumentParser(
@@ -205,6 +277,12 @@ def parse_args():
         required=True,
         metavar="DIR",
         help="""Input CSVs are here.""",
+    )
+
+    parser.add_argument(
+        "--replace",
+        action="store_true",
+        help="""Are we appending data to the tables or overwriting the tables.""",
     )
 
     return parser.parse_args()
