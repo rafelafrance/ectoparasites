@@ -74,12 +74,16 @@ def extract_csv_data(csv_tables, db_table):
                 db_table_data = csv_table.loc[:, targets]
 
                 # Rename CSV columns to what they'll be in the database table
-                renames = {t: f.name for t, f in zip(targets, db_table.columns)}
+                renames = db_table.renames(targets)
                 db_table_data = db_table_data.rename(renames, axis="columns")
 
                 # Try to get the proper data type for each column
-                types = {f.name: tables.SQLITE_TYPE[f.type] for f in db_table.columns}
+                types = db_table.sqlite_types(targets)
                 db_table_data = db_table_data.astype(types, errors="ignore")
+
+                # Add any missing optional fields to the table
+                for col in db_table.missing_columns(targets):
+                    db_table_data[col] = None
 
                 all_csv_data.append(db_table_data)
                 logging.info(f"Hit  {db_table.name} & {csv_name}")

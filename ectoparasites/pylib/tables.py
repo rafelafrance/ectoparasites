@@ -1,27 +1,6 @@
 from dataclasses import dataclass
 from itertools import product
 
-
-@dataclass
-class Column:
-    name: str
-    type: str
-    csv: list[str]  # If a column is optional add a None entry in this list
-
-
-@dataclass
-class Table:
-    name: str
-    columns: list[Column]
-
-    def csv_permutations(self):
-        options = [c.csv for c in self.columns]
-        col_sets = [[c for c in p if c] for p in product(*options)]
-        # We want as many columns as possible so try the longer lists first
-        col_sets = sorted(col_sets, key=lambda s: len(s), reverse=True)
-        return col_sets
-
-
 SQLITE_TYPE = {
     "categorical": "string",
     "int": "int32",
@@ -32,6 +11,45 @@ SQLITE_TYPE = {
     "time":  "string",
     "y/n": "boolean",
 }
+
+
+@dataclass
+class Column:
+    name: str
+    type: str
+    csv: list[str]  # If a column is optional add a None entry in this list
+
+
+class Table:
+    def __init(self, name, columns):
+        self.name: str = name
+        self.columns: list[Column] = columns
+
+        self.renames = {}
+        self.types = {}
+        for col in self.columns:
+            for csv_field in [c for c in col.csv if c]:
+                self.renames[csv_field] = col.name
+                self.types[csv_field] = col.type
+
+
+    def csv_permutations(self):
+        options = [c.csv for c in self.columns]
+        col_sets = [[c for c in p if c] for p in product(*options)]
+        # We want as many columns as possible so try the longer lists first
+        col_sets = sorted(col_sets, key=lambda s: len(s), reverse=True)
+        return col_sets
+
+    def renames(self, csv_fields):
+        return {f: self.rename[f] for f in csv_fields}
+
+    def sqlite_types(self, csv_fields):
+        return {f: SQLITE_TYPE[self.types[f]] for f in csv_fields}
+
+    def missing_columns(self, csv_fields):
+        hits = set(self.renames(csv_fields).values())
+        missing = [c.name for c in self.columns if c not in hits]
+        return missing
 
 
 TABLES = [
